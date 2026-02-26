@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Antigravity UI Custom Utilities */
+
+.glass-panel {
+  @apply bg-surface-glass backdrop-blur-2xl border-t border-l border-white/10;
+}
+
+.text-tactical {
+  @apply font-mono tracking-widest uppercase text-gray-400 text-xs;
+}
+
+/* Background Atmosphere Orbs */
+.bg-orb-emerald {
+  @apply absolute rounded-full bg-primary-emerald/20 blur-[120px] mix-blend-screen pointer-events-none;
+}
+
+.bg-orb-violet {
+  @apply absolute rounded-full bg-primary-violet/20 blur-[120px] mix-blend-screen pointer-events-none;
+}

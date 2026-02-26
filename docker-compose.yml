@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/lifeshield
+      - JWT_SECRET=super_secret
+      - JWT_EXPIRE=15m
+      - JWT_REFRESH_SECRET=super_refresh_secret
+      - JWT_REFRESH_EXPIRE=7d
+    depends_on:
+      - mongo
+    networks:
+      - lifeshield-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    depends_on:
+      - backend
+    networks:
+      - lifeshield-network
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - lifeshield-network
+
+networks:
+  lifeshield-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
