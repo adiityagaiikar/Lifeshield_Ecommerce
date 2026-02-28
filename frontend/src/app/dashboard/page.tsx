@@ -64,10 +64,10 @@ export default function DashboardPage() {
         }
 
         if (stock <= 5) {
-            return 'text-primary-violet bg-primary-violet/10 border-primary-violet/20';
+            return 'text-gray-400 bg-white/[0.03] border-white/10';
         }
 
-        return 'text-primary-emerald bg-primary-emerald/10 border-primary-emerald/20';
+        return 'text-gray-400 bg-white/[0.03] border-white/10';
     };
 
     return (
@@ -79,21 +79,21 @@ export default function DashboardPage() {
                 className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-white/10 pb-8 pt-12"
             >
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight">OPERATIONS CENTER</h1>
+                    <h1 className="text-4xl font-black tracking-tight text-white/90">OPERATIONS CENTER</h1>
                     <p className="text-tactical mt-2">LIVE INVENTORY TELEMETRY // CLEARANCE: STANDARD</p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-auto">
                     <div className="glass-panel px-6 py-4 flex flex-col items-end rounded-sm">
                         <span className="text-tactical text-gray-400">ASSET TYPES</span>
-                        <span className="text-2xl font-mono text-white">{metrics.totalAssets}</span>
+                        <span className="text-2xl font-mono text-white/90">{metrics.totalAssets}</span>
                     </div>
                     <div className="glass-panel px-6 py-4 flex flex-col items-end rounded-sm">
                         <span className="text-tactical text-gray-400">STOCK UNITS</span>
-                        <span className="text-2xl font-mono text-white">{metrics.totalStockUnits}</span>
+                        <span className="text-2xl font-mono text-white/90">{metrics.totalStockUnits}</span>
                     </div>
                     <div className="glass-panel px-6 py-4 flex flex-col items-end rounded-sm">
                         <span className="text-tactical text-gray-400">LOW STOCK</span>
-                        <span className="text-2xl font-mono text-primary-violet">{metrics.lowStockCount}</span>
+                        <span className="text-2xl font-mono text-gray-400">{metrics.lowStockCount}</span>
                     </div>
                     <div className="glass-panel px-6 py-4 flex flex-col items-end rounded-sm">
                         <span className="text-tactical text-gray-400">DEPLETED</span>
@@ -110,15 +110,15 @@ export default function DashboardPage() {
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                 className="glass-panel rounded-sm overflow-hidden"
             >
-                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-void-800/80">
-                    <h2 className="font-bold tracking-widest text-lg">LOW STOCK PRIORITY BOARD</h2>
-                    <span className="text-tactical text-primary-violet">[ LIVE SUPPLY STATUS ]</span>
+                <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.03]">
+                    <h2 className="font-bold tracking-widest text-lg text-white/90">LOW STOCK PRIORITY BOARD</h2>
+                    <span className="text-tactical text-gray-400">[ LIVE SUPPLY STATUS ]</span>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white/5 text-tactical text-gray-400">
+                            <tr className="bg-white/[0.03] text-tactical text-gray-400">
                                 <th className="p-4 font-normal">ASSET</th>
                                 <th className="p-4 font-normal">CATEGORY</th>
                                 <th className="p-4 font-normal">PRICE</th>
@@ -145,20 +145,20 @@ export default function DashboardPage() {
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.3 + (index * 0.1) }}
-                                    className="border-b border-white/5 hover:bg-white/5 transition-colors group cursor-pointer"
+                                    className="border-b border-white/10 hover:bg-white/[0.03] transition-colors group cursor-pointer"
                                 >
-                                    <td className="p-4 text-white group-hover:text-primary-emerald transition-colors">
+                                    <td className="p-4 text-white/90 group-hover:text-white transition-colors">
                                         {product.name}
                                     </td>
                                     <td className="p-4 text-gray-400">{product.category}</td>
-                                    <td className="p-4 text-white">${product.price.toFixed(2)}</td>
+                                    <td className="p-4 text-white/90">₹{product.price.toFixed(2)}</td>
                                     <td className="p-4">
                                         <span className={`px-2 py-1 border text-xs tracking-widest ${getStockTag(product.stock)}`}>
                                             [ {product.stock === 0 ? 'DEPLETED' : `${product.stock} UNITS`} ]
                                         </span>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <Link href={`/products/${product._id}`} className="text-tactical text-gray-500 hover:text-white transition-colors">
+                                        <Link href={`/products/${product._id}`} className="text-tactical text-gray-400 hover:text-white/90 transition-colors">
                                             INSPECT {"->"}
                                         </Link>
                                     </td>

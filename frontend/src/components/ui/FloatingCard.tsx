@@ -2,7 +2,6 @@
 
 import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 interface FloatingCardProps {
     children?: ReactNode;
@@ -32,15 +31,14 @@ const FloatingCard: React.FC<FloatingCardProps> = ({
                 delay: delay
             }}
             whileHover={{ scale: 1.02, y: -8 }}
-            className={`glass-panel rounded-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-glow-emerald cursor-pointer group ${className}`}
+            className={`glass-panel overflow-hidden flex flex-col transition-all duration-300 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)] cursor-pointer group ${className}`}
         >
             {imageSrc && (
-                <div className="relative w-full h-48 md:h-64 overflow-hidden bg-void-800">
-                    <Image
+                <div className="relative w-full h-48 md:h-64 overflow-hidden bg-[#0f1118]">
+                    <img
                         src={imageSrc}
                         alt={title || 'Product Image'}
-                        fill
-                        className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                        className="w-full h-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                     />
                 </div>
             )}
@@ -48,7 +46,7 @@ const FloatingCard: React.FC<FloatingCardProps> = ({
             {(title || subtitle) && (
                 <div className="p-6 flex flex-col gap-2">
                     {subtitle && <span className="text-tactical">{subtitle}</span>}
-                    {title && <h3 className="text-2xl font-bold tracking-tight">{title}</h3>}
+                    {title && <h3 className="text-2xl font-bold tracking-tight text-white/90">{title}</h3>}
                 </div>
             )}
 

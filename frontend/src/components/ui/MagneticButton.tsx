@@ -33,11 +33,14 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
         setPosition({ x: 0, y: 0 });
     };
 
-    const getShadowColor = () => {
+    const getAccentClass = () => {
         switch (accent) {
-            case 'emerald': return 'hover:shadow-glow-emerald';
-            case 'violet': return 'hover:shadow-glow-violet';
-            default: return 'hover:shadow-[0_0_40px_rgba(255,255,255,0.1)]';
+            case 'emerald':
+                return 'bg-indigo-600/20 hover:bg-indigo-500/30 border-indigo-500/50 text-indigo-300 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)]';
+            case 'violet':
+                return 'bg-violet-600/20 hover:bg-violet-500/30 border-violet-500/50 text-violet-300 hover:shadow-[0_0_40px_rgba(139,92,246,0.2)]';
+            default:
+                return 'bg-white/5 hover:bg-white/10 border-white/20 text-white/90 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)]';
         }
     };
 
@@ -49,7 +52,7 @@ const MagneticButton: React.FC<MagneticButtonProps> = ({
             animate={{ x: position.x, y: position.y }}
             transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.5 }}
             onClick={onClick}
-            className={`glass-panel px-8 py-4 font-mono uppercase tracking-widest text-sm text-white rounded-sm transition-shadow duration-500 ${getShadowColor()} ${className}`}
+            className={`px-8 py-4 uppercase tracking-[0.2em] text-xs font-mono font-bold border rounded-2xl transition-all duration-300 ${getAccentClass()} ${className}`}
         >
             {children}
         </motion.button>

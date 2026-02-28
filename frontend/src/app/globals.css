@@ -2,9 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
-  --background: #050505;
-  --foreground: #ffffff;
+  --background: #0a0b10;
+  --foreground: rgba(255, 255, 255, 0.9);
 }
 
 body {
@@ -12,23 +13,27 @@ body {
   background: var(--background);
   font-family: var(--font-geist-sans), 'Inter', sans-serif;
   overflow-x: hidden;
+  transition: background 0.2s, color 0.2s;
 }
 
 /* Antigravity UI Custom Utilities */
 
 .glass-panel {
-  @apply bg-surface-glass backdrop-blur-2xl border-t border-l border-white/10;
+  @apply bg-white/[0.03] border border-white/10 backdrop-blur-2xl rounded-2xl;
 }
 
 .text-tactical {
-  @apply font-mono tracking-widest uppercase text-gray-400 text-xs;
+  @apply uppercase tracking-[0.2em] text-xs font-mono font-bold text-gray-400;
 }
 
-/* Background Atmosphere Orbs */
 .bg-orb-emerald {
-  @apply absolute rounded-full bg-primary-emerald/20 blur-[120px] mix-blend-screen pointer-events-none;
+  @apply absolute rounded-full bg-indigo-500/20 blur-[140px] pointer-events-none;
 }
 
 .bg-orb-violet {
-  @apply absolute rounded-full bg-primary-violet/20 blur-[120px] mix-blend-screen pointer-events-none;
+  @apply absolute rounded-full bg-violet-500/20 blur-[140px] pointer-events-none;
+}
+
+.hud-button {
+  @apply bg-indigo-600/20 hover:bg-indigo-500/30 border border-indigo-500/50 text-indigo-300 transition-all duration-300 uppercase tracking-[0.2em] text-xs font-mono font-bold;
 }

@@ -12,5 +12,6 @@ router
     .route('/:id')
     .get(product_controller_1.getProductById)
     .put(auth_middleware_1.protect, auth_middleware_1.admin, product_controller_1.updateProduct);
+router.route('/:id/reviews').post(auth_middleware_1.protect, product_controller_1.createProductReview);
 exports.default = router;
 //# sourceMappingURL=product.routes.js.map

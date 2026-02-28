@@ -8,7 +8,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-const express_mongo_sanitize_1 = __importDefault(require("express-mongo-sanitize"));
 const dompurify_1 = __importDefault(require("dompurify"));
 const jsdom_1 = require("jsdom");
 const db_1 = __importDefault(require("./config/db"));
@@ -17,6 +16,7 @@ const error_middleware_1 = require("./middlewares/error.middleware");
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const product_routes_1 = __importDefault(require("./routes/product.routes"));
 const order_routes_1 = __importDefault(require("./routes/order.routes"));
+const cart_routes_1 = __importDefault(require("./routes/cart.routes"));
 dotenv_1.default.config();
 const requiredEnv = [
     'MONGO_URI',
@@ -32,6 +32,18 @@ if (missingEnv.length > 0) {
 // Connect to MongoDB
 (0, db_1.default)();
 const app = (0, express_1.default)();
+const sanitizeNoSqlPayload = (value) => {
+    if (Array.isArray(value)) {
+        return value.map((item) => sanitizeNoSqlPayload(item));
+    }
+    if (value && typeof value === 'object') {
+        const sanitizedEntries = Object.entries(value)
+            .filter(([key]) => !key.startsWith('$') && !key.includes('.'))
+            .map(([key, nestedValue]) => [key, sanitizeNoSqlPayload(nestedValue)]);
+        return Object.fromEntries(sanitizedEntries);
+    }
+    return value;
+};
 // Security Middleware
 app.use((0, helmet_1.default)());
 const defaultAllowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
@@ -40,10 +52,11 @@ const envAllowedOrigins = (process.env.CORS_ORIGINS || '')
     .map((value) => value.trim())
     .filter(Boolean);
 const allowedOrigins = envAllowedOrigins.length > 0 ? envAllowedOrigins : defaultAllowedOrigins;
+const localhostOriginRegex = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/i;
 // CORS config
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || localhostOriginRegex.test(origin)) {
             callback(null, true);
             return;
         }
@@ -59,8 +72,19 @@ const limiter = (0, express_rate_limit_1.default)({
 app.use('/api/', limiter);
 // Body parser
 app.use(express_1.default.json({ limit: '10kb' }));
-// Data sanitization against NoSQL query injection
-app.use((0, express_mongo_sanitize_1.default)());
+// Data sanitization against NoSQL query injection (Express 5 safe)
+app.use((req, res, next) => {
+    if (req.body) {
+        req.body = sanitizeNoSqlPayload(req.body);
+    }
+    if (req.params) {
+        Object.assign(req.params, sanitizeNoSqlPayload(req.params));
+    }
+    if (req.query) {
+        Object.assign(req.query, sanitizeNoSqlPayload(req.query));
+    }
+    next();
+});
 // Custom XSS Sanitization Middleware using DOMPurify
 const window = new jsdom_1.JSDOM('').window;
 const purify = (0, dompurify_1.default)(window);
@@ -82,6 +106,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/v1/auth', auth_routes_1.default);
 app.use('/api/v1/products', product_routes_1.default);
 app.use('/api/v1/orders', order_routes_1.default);
+app.use('/api/v1/cart', cart_routes_1.default);
 // Error Handling Middleware
 app.use(error_middleware_1.notFound);
 app.use(error_middleware_1.errorHandler);

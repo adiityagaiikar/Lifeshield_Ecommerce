@@ -28,9 +28,9 @@ const Accordion: React.FC<AccordionProps> = ({ items }) => {
                     <div key={index} className="glass-panel rounded-sm overflow-hidden">
                         <button
                             onClick={() => toggle(index)}
-                            className="w-full flex justify-between items-center p-4 bg-void-800/50 hover:bg-void-800 transition-colors"
+                            className="w-full flex justify-between items-center p-4 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
                         >
-                            <span className="font-mono text-sm tracking-widest uppercase text-white">
+                            <span className="uppercase tracking-[0.2em] text-xs font-mono font-bold text-gray-400">
                                 {item.title}
                             </span>
                             <motion.div
@@ -53,7 +53,7 @@ const Accordion: React.FC<AccordionProps> = ({ items }) => {
                                     }}
                                     transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                                 >
-                                    <div className="p-4 text-gray-400 text-sm leading-relaxed border-t border-white/5">
+                                    <div className="p-4 text-gray-400 text-sm leading-relaxed border-t border-white/10">
                                         {item.content}
                                     </div>
                                 </motion.div>

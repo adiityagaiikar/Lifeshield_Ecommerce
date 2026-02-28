@@ -6,6 +6,7 @@ import MagneticButton from '@/components/ui/MagneticButton';
 import FloatingCard from '@/components/ui/FloatingCard';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { getProductImageSrc } from '@/lib/productImage';
 
 interface Product {
   _id: string;
@@ -15,13 +16,6 @@ interface Product {
   image: string;
   stock: number;
 }
-
-const getImageSrc = (image: string) => {
-  if (!image || image === 'no-photo.jpg') {
-    return '/placeholder.jpg';
-  }
-  return image.startsWith('/') ? image : `/${image}`;
-};
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -48,14 +42,13 @@ export default function Home() {
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           className="z-10 flex flex-col items-center gap-6 max-w-4xl"
         >
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mix-blend-plus-lighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white/90">
             PREPAREDNESS <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-emerald to-primary-violet">MADE SIMPLE</span>
+            <span className="text-gray-400">MADE SIMPLE</span>
           </h1>
-          <p className="text-tactical mt-4 max-w-xl mx-auto leading-relaxed text-gray-400">
-            [ SECURE / DEPLOY / SURVIVE ] <br />
-            ENTERPRISE-GRADE EMERGENCY KITS AND EXPEDITIONARY GEAR.
-            BUILT FOR THE UNKNOWN. ENGINEERED FOR ZERO GRAVITY PERFORMANCE.
+          <p className="text-tactical mt-4 max-w-xl mx-auto leading-relaxed">
+            [ SECURE / PREPARE / RESPOND ] <br />
+            Enterprise-grade emergency kits and reliable preparedness essentials.
           </p>
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link href="/products">
@@ -77,14 +70,14 @@ export default function Home() {
           transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
         >
           <div className="w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] rounded-full border border-white/5 opacity-50 absolute" />
-          <div className="w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full border border-primary-emerald/10 opacity-30 absolute rotate-45" />
-          <div className="w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] rounded-full border border-primary-violet/10 opacity-20 absolute -rotate-12" />
+          <div className="w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full border border-white/10 opacity-30 absolute rotate-45" />
+          <div className="w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] rounded-full border border-gray-400 opacity-20 absolute -rotate-12" />
         </motion.div>
       </section>
 
       <section className="py-24 relative z-10 w-full max-w-7xl mx-auto flex flex-col gap-12">
         <div className="text-tactical border-b border-white/10 pb-4">
-          [ FEATURED ASSETS ]
+          [ FEATURED PRODUCTS ]
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[250px]">
@@ -96,16 +89,16 @@ export default function Home() {
                 className={index === 0 ? 'md:col-span-2 lg:col-span-2 row-span-2' : 'row-span-1'}
               >
                 <FloatingCard
-                  className={`h-full ${index === 0 ? 'bg-gradient-to-br from-void-800 to-void-900' : 'bg-void-800'}`}
+                  className="h-full"
                   title={product.name}
                   subtitle={`[ ${product.category.toUpperCase()} ]`}
-                  imageSrc={getImageSrc(product.image)}
+                  imageSrc={getProductImageSrc(product.image)}
                   delay={0.1 + (index * 0.1)}
                 >
                   <div className="mt-4 flex justify-between items-center w-full">
-                    <span className="font-mono text-xl text-primary-emerald font-bold">${product.price.toFixed(2)}</span>
-                    <span className={`text-tactical px-2 py-1 ${product.stock > 0 ? 'bg-primary-emerald/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {product.stock > 0 ? 'DEPLOYABLE' : 'DEPLETED'}
+                    <span className="font-mono text-xl text-white/90 font-bold">₹{product.price.toFixed(2)}</span>
+                    <span className={`text-tactical px-2 py-1 rounded-2xl ${product.stock > 0 ? 'bg-white/[0.03] border border-white/10 text-gray-400' : 'bg-red-500/10 border border-red-400/30 text-red-300'}`}>
+                      {product.stock > 0 ? 'IN STOCK' : 'OUT OF STOCK'}
                     </span>
                   </div>
                 </FloatingCard>
@@ -113,7 +106,7 @@ export default function Home() {
             ))
           ) : (
             <div className="md:col-span-3 lg:col-span-4 glass-panel p-10 text-center">
-              <p className="text-tactical">LIVE ASSET FEED IS OFFLINE. CHECK BACK SHORTLY.</p>
+              <p className="text-tactical">Product feed is temporarily unavailable.</p>
             </div>
           )}
         </div>

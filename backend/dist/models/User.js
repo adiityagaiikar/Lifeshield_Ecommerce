@@ -31,14 +31,12 @@ const UserSchema = new mongoose_1.default.Schema({
         minlength: 6,
         select: false,
     },
-    resetPasswordToken: String,
-    resetPasswordExpire: Date,
 }, {
     timestamps: true,
 });
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function () {
-    if (!this.isModified('password')) {
+    if (!this.isModified('password') || !this.password) {
         return;
     }
     const salt = await bcrypt_1.default.genSalt(10);
@@ -46,17 +44,19 @@ UserSchema.pre('save', async function () {
 });
 // Sign JWT and return
 UserSchema.methods.getSignedJwtAccessToken = function () {
-    return jsonwebtoken_1.default.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE,
+    return jsonwebtoken_1.default.sign({ id: this._id }, process.env.JWT_SECRET || '', {
+        expiresIn: process.env.JWT_EXPIRE || '15m',
     });
 };
 UserSchema.methods.getSignedJwtRefreshToken = function () {
-    return jsonwebtoken_1.default.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET, {
-        expiresIn: process.env.JWT_REFRESH_EXPIRE,
+    return jsonwebtoken_1.default.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET || '', {
+        expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
     });
 };
 // Match user entered password to hashed password in database
 UserSchema.methods.matchPassword = async function (enteredPassword) {
+    if (!this.password)
+        return false;
     return await bcrypt_1.default.compare(enteredPassword, this.password);
 };
 exports.default = mongoose_1.default.model('User', UserSchema);

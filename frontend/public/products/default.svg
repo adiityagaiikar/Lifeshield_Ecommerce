@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <rect width="1200" height="900" fill="#F3F4F6"/>
+  <rect x="120" y="120" width="960" height="660" rx="24" fill="#E5E7EB"/>
+  <rect x="220" y="220" width="760" height="460" rx="18" fill="#D1D5DB"/>
+  <text x="600" y="470" text-anchor="middle" fill="#374151" font-size="64" font-family="Arial, sans-serif" font-weight="700">LIFESHIELD</text>
+  <text x="600" y="540" text-anchor="middle" fill="#6B7280" font-size="28" font-family="Arial, sans-serif">Preparedness Product</text>
+</svg>

@@ -1,8 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose, { Document, Model } from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const UserSchema = new mongoose.Schema(
+export interface IUser extends Document {
+    name: string;
+    email: string;
+    role: 'user' | 'admin';
+    password?: string;
+    matchPassword(enteredPassword: string): Promise<boolean>;
+    getSignedJwtAccessToken(): string;
+    getSignedJwtRefreshToken(): string;
+}
+
+const UserSchema = new mongoose.Schema<IUser>(
     {
         name: {
             type: String,
@@ -28,8 +38,6 @@ const UserSchema = new mongoose.Schema(
             minlength: 6,
             select: false,
         },
-        resetPasswordToken: String,
-        resetPasswordExpire: Date,
     },
     {
         timestamps: true,
@@ -38,30 +46,30 @@ const UserSchema = new mongoose.Schema(
 
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function () {
-    if (!this.isModified('password')) {
+    if (!this.isModified('password') || !this.password) {
         return;
     }
-
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Sign JWT and return
-UserSchema.methods.getSignedJwtAccessToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET as string, {
-        expiresIn: process.env.JWT_EXPIRE as any,
-    });
+UserSchema.methods.getSignedJwtAccessToken = function (this: IUser): string {
+    return jwt.sign({ id: this._id }, process.env.JWT_SECRET || '', {
+        expiresIn: process.env.JWT_EXPIRE || '15m',
+    } as jwt.SignOptions);
 };
 
-UserSchema.methods.getSignedJwtRefreshToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET as string, {
-        expiresIn: process.env.JWT_REFRESH_EXPIRE as any,
-    });
+UserSchema.methods.getSignedJwtRefreshToken = function (this: IUser): string {
+    return jwt.sign({ id: this._id }, process.env.JWT_REFRESH_SECRET || '', {
+        expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
+    } as jwt.SignOptions);
 };
 
 // Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword: string) {
+UserSchema.methods.matchPassword = async function (this: IUser, enteredPassword: string): Promise<boolean> {
+    if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model<IUser>('User', UserSchema);

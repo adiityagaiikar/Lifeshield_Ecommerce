@@ -12,15 +12,15 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         void: {
-          900: "#050505",
-          800: "#0f111a",
+          900: "#0a0b10",
+          800: "#12141d",
         },
         primary: {
-          violet: "#4c1d95",
-          emerald: "#064e3b"
+          violet: "#818cf8",
+          emerald: "#34d399"
         },
         surface: {
-          glass: "rgba(255, 255, 255, 0.02)"
+          glass: "rgba(255, 255, 255, 0.03)"
         }
       },
       backgroundImage: {
@@ -31,9 +31,9 @@ const config: Config = {
         mono: ['var(--font-geist-mono)', 'monospace'],
       },
       boxShadow: {
-        'glow-emerald': '0 0 40px rgba(52, 211, 153, 0.1)',
-        'glow-emerald-hover': '0 0 60px rgba(52, 211, 153, 0.25)',
-        'glow-violet': '0 0 40px rgba(139, 92, 246, 0.1)',
+        'glow-emerald': '0 0 30px rgba(52, 211, 153, 0.12)',
+        'glow-emerald-hover': '0 0 50px rgba(52, 211, 153, 0.2)',
+        'glow-violet': '0 0 40px rgba(99, 102, 241, 0.2)',
       }
     },
   },

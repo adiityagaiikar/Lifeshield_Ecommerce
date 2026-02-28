@@ -26,11 +26,11 @@ const SidebarFilter = ({
             </div>
 
             <div className="mb-8 border-b border-white/10 pb-6">
-                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                <h4 className="text-white/90 font-bold mb-4 flex items-center gap-2 text-tactical">
                     <Filter size={16} className="text-primary-emerald" /> CATEGORY
                 </h4>
                 <div className="flex flex-col gap-3 text-sm text-gray-400">
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-white/90 transition-colors">
                         <input
                             type="radio"
                             name="category"
@@ -41,7 +41,7 @@ const SidebarFilter = ({
                         All Categories
                     </label>
                     {categories.map((category) => (
-                        <label key={category} className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+                        <label key={category} className="flex items-center gap-2 cursor-pointer hover:text-white/90 transition-colors">
                             <input
                                 type="radio"
                                 name="category"
@@ -56,11 +56,11 @@ const SidebarFilter = ({
             </div>
 
             <div className="mb-8 border-b border-white/10 pb-6">
-                <h4 className="text-white font-bold mb-4 flex items-center gap-2">
+                <h4 className="text-white/90 font-bold mb-4 flex items-center gap-2 text-tactical">
                     <PackageSearch size={16} className="text-primary-violet" /> STOCK STATUS
                 </h4>
                 <div className="flex flex-col gap-3 text-sm text-gray-400">
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-white/90 transition-colors">
                         <input
                             type="radio"
                             name="stock"
@@ -70,7 +70,7 @@ const SidebarFilter = ({
                         />
                         All Deployment Assets
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-white/90 transition-colors">
                         <input
                             type="radio"
                             name="stock"
@@ -85,7 +85,7 @@ const SidebarFilter = ({
 
             <button
                 type="button"
-                className="w-full glass-panel py-2 text-tactical hover:text-white transition-colors"
+                className="w-full hud-button py-2 rounded-2xl hover:shadow-[0_0_40px_rgba(99,102,241,0.15)]"
                 onClick={onReset}
             >
                 Reset Filters

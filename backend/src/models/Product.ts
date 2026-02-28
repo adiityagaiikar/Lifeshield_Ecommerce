@@ -1,72 +1,89 @@
-import mongoose from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-const ProductSchema = new mongoose.Schema(
+interface IProductReview {
+    user: mongoose.Types.ObjectId;
+    name: string;
+    rating: number;
+    comment: string;
+    createdAt: Date;
+}
+
+export interface IProduct extends Document {
+    name: string;
+    sku: string;
+    category: string;
+    price: number;
+    description: string;
+    image: string;
+    stock: number;
+    stockCount: number;
+    baseShelfLifeDays: number;
+    tags: string[];
+    demandVelocity: number;
+    features: string[];
+    techSpecs: {
+        weight?: string;
+        dimensions?: string;
+        material?: string;
+        warranty?: string;
+    };
+    reviews: IProductReview[];
+    numReviews: number;
+    rating: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const ProductReviewSchema = new Schema<IProductReview>(
     {
-        name: {
-            type: String,
-            required: [true, 'Please add a product name'],
-            trim: true,
-            maxlength: [100, 'Name can not be more than 100 characters'],
-        },
-        sku: {
-            type: String,
-            required: [true, 'Please add an SKU'],
-            unique: true,
-            trim: true,
-            uppercase: true
-        },
+        user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        name: { type: String, required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 },
+        comment: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+    },
+    { _id: false }
+);
+
+const ProductSchema = new Schema<IProduct>(
+    {
+        name: { type: String, required: true },
+        sku: { type: String, required: true, unique: true },
+        category: { type: String, required: true },
+        price: { type: Number, required: true },
         description: {
             type: String,
-            required: [true, 'Please add a description'],
-            maxlength: [1000, 'Description can not be more than 1000 characters'],
+            required: true,
+            default: 'Reliable emergency preparedness gear built for everyday resilience.',
         },
-        price: {
-            type: Number,
-            required: [true, 'Please add a price'],
-        },
-        category: {
-            type: String,
-            required: [true, 'Please add a category'],
-            enum: [
-                'Water Purification',
-                'Tactical Medkits',
-                'Long-Term Rations',
-                'Power & Comms',
-                'Shelter & Warmth',
-                'Tools & Hardware'
-            ]
-        },
-        stock: {
-            type: Number,
-            required: [true, 'Please add stock quantity'],
-            min: [0, 'Stock cannot be negative'],
-            default: 0
-        },
-        image: {
-            type: String,
-            default: 'no-photo.jpg',
-        },
-        features: {
-            type: [String],
-            validate: [arrayLimit, '{PATH} exceeds the limit of 10']
-        },
+        image: { type: String, default: '/assets/products/default.svg' },
+        stock: { type: Number, required: true, default: 0 },
+        stockCount: { type: Number, required: true, default: 0 },
+        baseShelfLifeDays: { type: Number, required: true, default: 365 },
+        tags: { type: [String], default: [] },
+        demandVelocity: { type: Number, default: 0 },
+        features: { type: [String], default: [] },
         techSpecs: {
-            weight: String,
-            dimensions: String,
-            material: String,
-            warranty: String
-        }
+            weight: { type: String, default: '' },
+            dimensions: { type: String, default: '' },
+            material: { type: String, default: '' },
+            warranty: { type: String, default: '' },
+        },
+        reviews: { type: [ProductReviewSchema], default: [] },
+        numReviews: { type: Number, default: 0 },
+        rating: { type: Number, default: 0 },
     },
     {
         timestamps: true,
     }
 );
 
-function arrayLimit(val: string[]) {
-    return val.length <= 10;
-}
+ProductSchema.pre('save', function () {
+    if (this.stockCount !== this.stock) {
+        this.stockCount = this.stock;
+    }
+});
 
-// Create text index for full-text search
-ProductSchema.index({ name: 'text', description: 'text', category: 'text' });
+ProductSchema.index({ name: 'text', tags: 'text', category: 'text' });
 
-export default mongoose.model('Product', ProductSchema);
+export const Product = mongoose.model<IProduct>('Product', ProductSchema);

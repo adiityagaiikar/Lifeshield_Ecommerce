@@ -1,204 +1,42 @@
-import mongoose from 'mongoose';
-declare const _default: mongoose.Model<{
+import mongoose, { Document } from 'mongoose';
+interface IProductReview {
+    user: mongoose.Types.ObjectId;
     name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps, {}, {}, {
-    id: string;
-}, mongoose.Document<unknown, {}, {
+    rating: number;
+    comment: string;
+    createdAt: Date;
+}
+export interface IProduct extends Document {
     name: string;
-    description: string;
     sku: string;
+    category: string;
     price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps, {
-    id: string;
-}, {
-    timestamps: true;
-}> & Omit<{
-    name: string;
     description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
     image: string;
+    stock: number;
+    stockCount: number;
+    baseShelfLifeDays: number;
+    tags: string[];
+    demandVelocity: number;
     features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps & {
+    techSpecs: {
+        weight?: string;
+        dimensions?: string;
+        material?: string;
+        warranty?: string;
+    };
+    reviews: IProductReview[];
+    numReviews: number;
+    rating: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+export declare const Product: mongoose.Model<IProduct, {}, {}, {}, mongoose.Document<unknown, {}, IProduct, {}, mongoose.DefaultSchemaOptions> & IProduct & Required<{
     _id: mongoose.Types.ObjectId;
-} & {
+}> & {
     __v: number;
-}, "id"> & {
+} & {
     id: string;
-}, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
-    timestamps: true;
-}, {
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps, {
-    id: string;
-}, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
-    timestamps: true;
-}>> & Omit<{
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-} & mongoose.DefaultTimestampProps & {
-    _id: mongoose.Types.ObjectId;
-} & {
-    __v: number;
-}, "id"> & {
-    id: string;
-}, {
-    [path: string]: mongoose.SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: mongoose.SchemaDefinitionProperty<any, any, mongoose.Document<unknown, {}, {
-        name: string;
-        description: string;
-        sku: string;
-        price: number;
-        category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-        stock: number;
-        image: string;
-        features: string[];
-        techSpecs?: {
-            weight?: string | null;
-            dimensions?: string | null;
-            material?: string | null;
-            warranty?: string | null;
-        } | null;
-    } & mongoose.DefaultTimestampProps, {
-        id: string;
-    }, mongoose.MergeType<mongoose.DefaultSchemaOptions, {
-        timestamps: true;
-    }>> & Omit<{
-        name: string;
-        description: string;
-        sku: string;
-        price: number;
-        category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-        stock: number;
-        image: string;
-        features: string[];
-        techSpecs?: {
-            weight?: string | null;
-            dimensions?: string | null;
-            material?: string | null;
-            warranty?: string | null;
-        } | null;
-    } & mongoose.DefaultTimestampProps & {
-        _id: mongoose.Types.ObjectId;
-    } & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-}, {
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-    createdAt: NativeDate;
-    updatedAt: NativeDate;
-} & {
-    _id: mongoose.Types.ObjectId;
-} & {
-    __v: number;
-}>, {
-    name: string;
-    description: string;
-    sku: string;
-    price: number;
-    category: "Water Purification" | "Tactical Medkits" | "Long-Term Rations" | "Power & Comms" | "Shelter & Warmth" | "Tools & Hardware";
-    stock: number;
-    image: string;
-    features: string[];
-    techSpecs?: {
-        weight?: string | null;
-        dimensions?: string | null;
-        material?: string | null;
-        warranty?: string | null;
-    } | null;
-    createdAt: NativeDate;
-    updatedAt: NativeDate;
-} & {
-    _id: mongoose.Types.ObjectId;
-} & {
-    __v: number;
-}>;
-export default _default;
+}, any, IProduct>;
+export {};
 //# sourceMappingURL=Product.d.ts.map

@@ -1,110 +1,283 @@
-import { Request, Response, NextFunction } from 'express';
-import Product from '../models/Product';
-import logger from '../utils/logger';
+import { Request, Response } from 'express';
+import { Product } from '../models/Product';
+import { UserAssessment } from '../models/UserAssessment';
+import { PipelineStage } from 'mongoose';
 
-// @desc    Fetch all products
-// @route   GET /api/v1/products
-// @access  Public
-export const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const pageSize = 10;
-        const page = Number(req.query.pageNumber) || 1;
+const serializeProduct = (product: any) => {
+    const resolvedStock = typeof product.stock === 'number' ? product.stock : product.stockCount;
+    const safeStock = typeof resolvedStock === 'number' ? resolvedStock : 0;
+    const imageValue = String(product.image || '/assets/products/default.svg');
+    const image = imageValue.startsWith('/products/')
+        ? imageValue.replace('/products/', '/assets/products/')
+        : imageValue;
 
-        // Keyword search
-        const keyword = req.query.keyword
-            ? {
-                $text: {
-                    $search: req.query.keyword as string,
-                },
-            }
-            : {};
-
-        // Category filter  
-        const category = req.query.category ? { category: req.query.category } : {};
-
-        const count = await Product.countDocuments({ ...keyword, ...category });
-        const products = await Product.find({ ...keyword, ...category })
-            .limit(pageSize)
-            .skip(pageSize * (page - 1));
-
-        res.json({ products, page, pages: Math.ceil(count / pageSize) });
-    } catch (error) {
-        next(error);
-    }
+    return {
+        _id: product._id,
+        name: product.name,
+        sku: product.sku,
+        category: product.category,
+        price: product.price,
+        description: product.description,
+        image,
+        stock: safeStock,
+        stockCount: safeStock,
+        baseShelfLifeDays: product.baseShelfLifeDays,
+        tags: product.tags || [],
+        demandVelocity: product.demandVelocity || 0,
+        features: product.features || [],
+        techSpecs: product.techSpecs || {},
+        reviews: product.reviews || [],
+        numReviews: product.numReviews || 0,
+        rating: product.rating || 0,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+    };
 };
 
-// @desc    Fetch single product
-// @route   GET /api/v1/products/:id
-// @access  Public
-export const getProductById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const product = await Product.findById(req.params.id);
+export const getProducts = async (req: Request, res: Response) => {
+    const pageSize = 12;
+    const page = Number(req.query.pageNumber) || 1;
+    const keyword = typeof req.query.keyword === 'string' ? req.query.keyword.trim() : '';
+    const category = typeof req.query.category === 'string' ? req.query.category.trim() : '';
 
-        if (product) {
-            res.json(product);
-        } else {
-            res.status(404);
-            throw new Error('Product not found');
-        }
-    } catch (error) {
-        next(error);
+    const filter: Record<string, any> = {};
+    if (keyword) {
+        filter.$text = { $search: keyword };
     }
+    if (category) {
+        filter.category = { $regex: new RegExp(`^${category}$`, 'i') };
+    }
+
+    const count = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(pageSize)
+        .skip(pageSize * (page - 1));
+
+    res.status(200).json({
+        products: products.map(serializeProduct),
+        page,
+        pages: Math.max(1, Math.ceil(count / pageSize)),
+        total: count,
+    });
 };
 
-// @desc    Create a product
-// @route   POST /api/v1/products
-// @access  Private/Admin
-export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
+export const getProductById = async (req: Request, res: Response) => {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+        res.status(404).json({ message: 'Product not found' });
+        return;
+    }
+
+    res.status(200).json(serializeProduct(product));
+};
+
+export const createProduct = async (req: Request, res: Response) => {
+    const payload = req.body || {};
+    const stockValue = Number(payload.stock ?? payload.stockCount ?? 0);
+
+    const createdProduct = await Product.create({
+        name: payload.name || 'New Product',
+        sku: payload.sku || `SKU-${Date.now()}`,
+        category: payload.category || 'General',
+        price: Number(payload.price ?? 0),
+        description: payload.description || 'Product description',
+        image: payload.image || '/assets/products/default.svg',
+        stock: stockValue,
+        stockCount: stockValue,
+        baseShelfLifeDays: Number(payload.baseShelfLifeDays ?? 365),
+        tags: Array.isArray(payload.tags) ? payload.tags : [],
+        demandVelocity: Number(payload.demandVelocity ?? 0),
+        features: Array.isArray(payload.features) ? payload.features : [],
+        techSpecs: payload.techSpecs || {},
+    });
+
+    res.status(201).json(serializeProduct(createdProduct));
+};
+
+export const updateProduct = async (req: Request, res: Response) => {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+        res.status(404).json({ message: 'Product not found' });
+        return;
+    }
+
+    const payload = req.body || {};
+    const hasStockUpdate = payload.stock !== undefined || payload.stockCount !== undefined;
+
+    product.name = payload.name ?? product.name;
+    product.sku = payload.sku ?? product.sku;
+    product.category = payload.category ?? product.category;
+    product.price = Number(payload.price ?? product.price);
+    product.description = payload.description ?? product.description;
+    product.image = payload.image ?? product.image;
+    product.baseShelfLifeDays = Number(payload.baseShelfLifeDays ?? product.baseShelfLifeDays);
+    product.tags = Array.isArray(payload.tags) ? payload.tags : product.tags;
+    product.demandVelocity = Number(payload.demandVelocity ?? product.demandVelocity);
+    product.features = Array.isArray(payload.features) ? payload.features : product.features;
+    product.techSpecs = payload.techSpecs ?? product.techSpecs;
+
+    if (hasStockUpdate) {
+        const stockValue = Number(payload.stock ?? payload.stockCount ?? product.stock ?? product.stockCount);
+        product.stock = stockValue;
+        product.stockCount = stockValue;
+    }
+
+    const updatedProduct = await product.save();
+    res.status(200).json(serializeProduct(updatedProduct));
+};
+
+export const createProductReview = async (req: Request, res: Response) => {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+        res.status(404).json({ message: 'Product not found' });
+        return;
+    }
+
+    const { rating, comment } = req.body;
+    const existingReview = product.reviews.find(
+        (item: any) => String(item.user) === String((req as any).user._id)
+    );
+
+    if (existingReview) {
+        res.status(400).json({ message: 'Product already reviewed by this user' });
+        return;
+    }
+
+    const parsedRating = Number(rating);
+    if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
+        res.status(400).json({ message: 'Rating must be between 1 and 5' });
+        return;
+    }
+
+    product.reviews.push({
+        user: (req as any).user._id,
+        name: (req as any).user.name,
+        rating: parsedRating,
+        comment: comment || '',
+        createdAt: new Date(),
+    } as any);
+
+    product.numReviews = product.reviews.length;
+    product.rating = product.reviews.reduce((acc: number, item: any) => acc + item.rating, 0) / product.numReviews;
+
+    await product.save();
+
+    res.status(201).json({ message: 'Review added successfully' });
+};
+
+/**
+ * Data Mining Aggregation Controller
+ * Analyzes recent purchases and assessments in a specific region to calculate
+ * demand velocity and flag high demand products.
+ */
+export const getHighDemandProductsByRegion = async (req: Request, res: Response): Promise<void> => {
     try {
-        const product = new Product({
-            name: 'Sample name',
-            sku: `SKU-${Date.now()}`,
-            price: 0,
-            description: 'Sample description',
-            image: '/images/sample.jpg',
-            category: 'Water Purification',
-            stock: 0,
+        const region = typeof req.params.region === 'string' ? req.params.region : '';
+
+        // Complex Aggregation Pipeline to determine High Demand Products
+        // 1. Find all users in the specified region via UserAssessment
+        // 2. Look up their recent inventories/purchases
+        // 3. Group by product to calculate demand velocity
+        // 4. Join with Product details
+        // 5. Filter for items exceeding a demand threshold
+
+        const pipeline: PipelineStage[] = [
+            // 1. Match assessments in the region (simulate finding active users there)
+            {
+                $match: {
+                    location: { $regex: new RegExp(region, 'i') }
+                }
+            },
+            // 2. Lookup inventories for these users (simulating recent purchases)
+            {
+                $lookup: {
+                    from: 'userinventories',
+                    localField: 'userId',
+                    foreignField: 'userId',
+                    as: 'inventories'
+                }
+            },
+            // Unwind to deconstruct the inventories array
+            { $unwind: '$inventories' },
+            // Consider only recent purchases (e.g., last 30 days) to calculate velocity
+            {
+                $match: {
+                    'inventories.purchaseDate': {
+                        // In MongoDB aggregation, we can use an expression or just pass the date via Mongoose
+                        $gte: new Date(new Date().setDate(new Date().getDate() - 30))
+                    }
+                }
+            },
+            // 3. Group by product to calculate demand score (velocity)
+            {
+                $group: {
+                    _id: '$inventories.productId',
+                    demandScore: { $sum: 1 }, // Simple count, could be weighted based on other factors
+                    uniqueBuyers: { $addToSet: '$userId' }
+                }
+            },
+            // Calculate velocity taking into account unique buyers density
+            {
+                $addFields: {
+                    calculatedVelocity: {
+                        $multiply: ['$demandScore', { $size: '$uniqueBuyers' }]
+                    }
+                }
+            },
+            // Filter for products that have a high demand velocity (threshold example: >= 5)
+            {
+                $match: {
+                    calculatedVelocity: { $gte: 5 }
+                }
+            },
+            // 4. Lookup actual product details
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }
+            },
+            { $unwind: '$productDetails' },
+            // 5. Shape the output for the "High Demand" UI rendering
+            {
+                $project: {
+                    _id: 1,
+                    name: '$productDetails.name',
+                    sku: '$productDetails.sku',
+                    category: '$productDetails.category',
+                    price: '$productDetails.price',
+                    stockCount: '$productDetails.stockCount',
+                    demandVelocity: '$calculatedVelocity',
+                    isHighDemand: { $literal: true }, // Flag for the frontend UI badge ("🔥 HIGH DEMAND IN YOUR REGION")
+                    tags: '$productDetails.tags'
+                }
+            },
+            // Sort by highest demand first
+            { $sort: { demandVelocity: -1 } }
+        ];
+
+        const highDemandProducts = await UserAssessment.aggregate<any>(pipeline);
+
+        // Note: To further enhance SCM, we could automatically update the Product's 'demandVelocity'
+        // field in the DB here based on this calculated result.
+
+        res.status(200).json({
+            success: true,
+            data: highDemandProducts,
+            message: `High demand products fetched for region: ${region}`,
         });
-
-        const createdProduct = await product.save();
-        logger.info(`New product created: ${createdProduct._id}`);
-        res.status(201).json(createdProduct);
-    } catch (error) {
-        next(error);
-    }
-};
-
-// @desc    Update a product
-// @route   PUT /api/v1/products/:id
-// @access  Private/Admin
-export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const {
-            name,
-            price,
-            description,
-            image,
-            category,
-            stock,
-        } = req.body;
-
-        const product = await Product.findById(req.params.id);
-
-        if (product) {
-            product.name = name;
-            product.price = price;
-            product.description = description;
-            product.image = image;
-            product.category = category;
-            product.stock = stock;
-
-            const updatedProduct = await product.save();
-            res.json(updatedProduct);
-        } else {
-            res.status(404);
-            throw new Error('Product not found');
-        }
-    } catch (error) {
-        next(error);
+    } catch (error: any) {
+        console.error('Error in getHighDemandProductsByRegion:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to analyze demand metrics',
+            error: error.message
+        });
     }
 };
