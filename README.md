@@ -47,10 +47,7 @@ Local MongoDB service:
 - Windows Services: start `MongoDB`
 - or run `mongod` if installed manually
 
-OR Docker MongoDB only:
-```bash
-docker run -d --name lifeshield-mongo -p 27017:27017 mongo:6.0
-```
+
 
 ### 4) Start backend
 ```bash
@@ -73,10 +70,6 @@ Verify frontend:
 - Open `http://localhost:3000`
 - Login page is at `http://localhost:3000/login`
 
-### 6) Optional: Run entire stack with Docker Compose
-```bash
-docker-compose up --build -d
-```
 
 ## API Documentation
 The API adheres strictly to REST conventions.
